@@ -1,0 +1,11 @@
+version: '3'
+services:
+  database:
+    image: postgres:11
+    container_name: laboratory-bd
+    ports:
+      - 7070:5432
+    environment:
+      POSTGRES_DB: laboratory
+      POSTGRES_USER: laboratory
+      POSTGRES_PASSWORD: 123
