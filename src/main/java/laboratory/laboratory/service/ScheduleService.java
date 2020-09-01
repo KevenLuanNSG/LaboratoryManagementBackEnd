@@ -183,4 +183,113 @@ public class ScheduleService {
 
         return schedule;
     }
+
+    @Transactional
+    public Optional<Schedule> cancelSchedule (Long scheduleId){
+        Optional<Schedule> schedule = this.scheduleRepository.findById(scheduleId);
+        if (!schedule.isPresent()){
+            throw new IllegalArgumentException("Schedule not existent.");
+        }
+        schedule.get().setTeacher(null);
+        schedule.get().setDiscipline(null);
+        schedule.get().setClassOfStudents(null);
+        schedule.get().setAvailable(true);
+
+        return schedule;
+    }
+
+    @Transactional
+    public Optional<Schedule> registerScheduleRecurrent (Schedule scheduleToRegister){
+        Optional<Schedule> schedule = this.scheduleRepository.findById(scheduleToRegister.getId());
+        if(!schedule.isPresent()){
+            throw new IllegalArgumentException("Schedule not existent.");
+        }
+        if(!schedule.get().isAvailable()){
+            throw new IllegalArgumentException("Schedule not available.");
+        }
+
+        Optional<ClassOfStudents> classOfStudents = this.classOfStudentsRepository.findById(scheduleToRegister.getClassOfStudents().getId());
+        if (!classOfStudents.isPresent()){
+            throw new IllegalArgumentException("Class of students not existent.");
+        }
+        Optional<Discipline> discipline = this.disciplineRepository.findById(scheduleToRegister.getDiscipline().getId());
+        if(!discipline.isPresent()){
+            throw new IllegalArgumentException("Discipline not existent.");
+        }
+        Optional<Laboratory> laboratory = this.laboratoryRepository.findById(scheduleToRegister.getLaboratory().getId());
+        if (!laboratory.isPresent()){
+            throw new IllegalArgumentException("Laboratory not existent.");
+        }
+        Optional<Semester> semester = this.semesterRepository.findById(scheduleToRegister.getSemester().getId());
+        if(!semester.isPresent()){
+            throw new IllegalArgumentException("Semester not existent.");
+        }
+        Optional<Teacher> teacher = this.teacherRepository.findById(scheduleToRegister.getTeacher().getId());
+        if(!teacher.isPresent()){
+            throw new IllegalArgumentException("Teacher not existent.");
+        }
+        if((semester.get().getId()) != (schedule.get().getSemester().getId())){
+            throw new IllegalArgumentException("Semester is incorrect.");
+        }
+        if((laboratory.get().getId()) != (schedule.get().getLaboratory().getId())){
+            throw new IllegalArgumentException("Laboratory is incorrect.");
+        }
+
+        if(classOfStudents.get().getNumberOfStudents() > laboratory.get().getCapacity()){
+            throw new IllegalArgumentException("Laboratory does not support the number of students.");
+        }
+
+        boolean disciplineExistent = false;
+        for (Discipline disciplineByClass: classOfStudents.get().getDisciplineList()
+        ) {
+            if (discipline.get().getId() == disciplineByClass.getId()){
+                disciplineExistent = true;
+            }
+        }
+        if (!disciplineExistent){
+            throw new IllegalArgumentException("Discipline not check with discipline of class.");
+        }
+
+        if (teacher.get().getId() != discipline.get().getTeacher().getId()){
+            throw new IllegalArgumentException("Teacher not check with discipline.");
+        }
+
+        LocalDateTime date = schedule.get().getDate();
+        while (date.isBefore(semester.get().getDateEnd().plusDays(1))){
+
+            Optional<Schedule> scheduleToRegisterRecurrent =  this.scheduleRepository.findByAvailableAndDateAndSemesterAndLaboratoryAndShiftAndScheduleTime(true, date, schedule.get().getSemester(), schedule.get().getLaboratory(), schedule.get().getShift(), schedule.get().getScheduleTime() );
+            if (scheduleToRegisterRecurrent.isPresent()){
+                scheduleToRegisterRecurrent.get().setClassOfStudents(classOfStudents.get());
+                scheduleToRegisterRecurrent.get().setDiscipline(discipline.get());
+                scheduleToRegisterRecurrent.get().setTeacher(teacher.get());
+                scheduleToRegisterRecurrent.get().setAvailable(false);
+            }
+
+            date = date.plusDays(7);
+        }
+        return schedule;
+    }
+
+    @Transactional
+    public Optional<Schedule> cancelScheduleRecurrent (Long scheduleId){
+        Optional<Schedule> schedule = this.scheduleRepository.findById(scheduleId);
+        if (!schedule.isPresent()){
+            throw new IllegalArgumentException("Schedule not existent.");
+        }
+        LocalDateTime date = schedule.get().getDate();
+        while (date.isBefore(schedule.get().getSemester().getDateEnd().plusDays(1))){
+
+            Optional<Schedule> scheduleToCancelRecurrent =  this.scheduleRepository.findByAvailableAndDateAndSemesterAndLaboratoryAndShiftAndScheduleTime(false, date, schedule.get().getSemester(), schedule.get().getLaboratory(), schedule.get().getShift(), schedule.get().getScheduleTime() );
+            if (scheduleToCancelRecurrent.isPresent()){
+                scheduleToCancelRecurrent.get().setClassOfStudents(null);
+                scheduleToCancelRecurrent.get().setDiscipline(null);
+                scheduleToCancelRecurrent.get().setTeacher(null);
+                scheduleToCancelRecurrent.get().setAvailable(true);
+            }
+
+            date = date.plusDays(7);
+        }
+
+        return schedule;
+    }
 }
