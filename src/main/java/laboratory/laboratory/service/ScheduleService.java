@@ -65,6 +65,7 @@ public class ScheduleService {
                 scheduleFirstMorning.setDate(date);
                 scheduleFirstMorning.setAvailable(true);
                 scheduleFirstMorning.setLaboratory(laboratory);
+                scheduleFirstMorning.setSemester(semester.get());
                 scheduleList.add(scheduleFirstMorning);
 
                 //Second time of morning
@@ -73,6 +74,7 @@ public class ScheduleService {
                 scheduleSecondMorning.setDate(date);
                 scheduleSecondMorning.setAvailable(true);
                 scheduleSecondMorning.setLaboratory(laboratory);
+                scheduleSecondMorning.setSemester(semester.get());
                 scheduleList.add(scheduleSecondMorning);
 
                 //First time of afternoon
@@ -81,6 +83,7 @@ public class ScheduleService {
                 scheduleFirstAfternoon.setDate(date);
                 scheduleFirstAfternoon.setAvailable(true);
                 scheduleFirstAfternoon.setLaboratory(laboratory);
+                scheduleFirstAfternoon.setSemester(semester.get());
                 scheduleList.add(scheduleFirstAfternoon);
 
                 //Second time of afternoon
@@ -89,6 +92,7 @@ public class ScheduleService {
                 scheduleSecondAfternoon.setDate(date);
                 scheduleSecondAfternoon.setAvailable(true);
                 scheduleSecondAfternoon.setLaboratory(laboratory);
+                scheduleSecondAfternoon.setSemester(semester.get());
                 scheduleList.add(scheduleSecondAfternoon);
 
                 //First time of night
@@ -97,6 +101,7 @@ public class ScheduleService {
                 scheduleFirstNight.setDate(date);
                 scheduleFirstNight.setAvailable(true);
                 scheduleFirstNight.setLaboratory(laboratory);
+                scheduleFirstNight.setSemester(semester.get());
                 scheduleList.add(scheduleFirstNight);
 
                 //Second time of night
@@ -105,6 +110,7 @@ public class ScheduleService {
                 scheduleSecondNight.setDate(date);
                 scheduleSecondNight.setAvailable(true);
                 scheduleSecondNight.setLaboratory(laboratory);
+                scheduleSecondNight.setSemester(semester.get());
                 scheduleList.add(scheduleSecondNight);
 
                 date = date.plusDays(1);
@@ -120,12 +126,61 @@ public class ScheduleService {
        if(!schedule.isPresent()){
            throw new IllegalArgumentException("Schedule not existent.");
        }
+       if(!schedule.get().isAvailable()){
+           throw new IllegalArgumentException("Schedule not available.");
+       }
+
        Optional<ClassOfStudents> classOfStudents = this.classOfStudentsRepository.findById(scheduleToRegister.getClassOfStudents().getId());
        if (!classOfStudents.isPresent()){
            throw new IllegalArgumentException("Class of students not existent.");
        }
-       //continuar criando if para existencia
+       Optional<Discipline> discipline = this.disciplineRepository.findById(scheduleToRegister.getDiscipline().getId());
+       if(!discipline.isPresent()){
+           throw new IllegalArgumentException("Discipline not existent.");
+       }
+       Optional<Laboratory> laboratory = this.laboratoryRepository.findById(scheduleToRegister.getLaboratory().getId());
+       if (!laboratory.isPresent()){
+           throw new IllegalArgumentException("Laboratory not existent.");
+       }
+       Optional<Semester> semester = this.semesterRepository.findById(scheduleToRegister.getSemester().getId());
+       if(!semester.isPresent()){
+           throw new IllegalArgumentException("Semester not existent.");
+       }
+       Optional<Teacher> teacher = this.teacherRepository.findById(scheduleToRegister.getTeacher().getId());
+       if(!teacher.isPresent()){
+           throw new IllegalArgumentException("Teacher not existent.");
+       }
+       if((semester.get().getId()) != (schedule.get().getSemester().getId())){
+           throw new IllegalArgumentException("Semester is incorrect.");
+       }
+       if((laboratory.get().getId()) != (schedule.get().getLaboratory().getId())){
+           throw new IllegalArgumentException("Laboratory is incorrect.");
+       }
 
-       return schedule;
+       if(classOfStudents.get().getNumberOfStudents() > laboratory.get().getCapacity()){
+           throw new IllegalArgumentException("Laboratory does not support the number of students.");
+       }
+
+       boolean disciplineExistent = false;
+        for (Discipline disciplineByClass: classOfStudents.get().getDisciplineList()
+             ) {
+            if (discipline.get().getId() == disciplineByClass.getId()){
+                disciplineExistent = true;
+            }
+        }
+        if (!disciplineExistent){
+            throw new IllegalArgumentException("Discipline not check with discipline of class.");
+        }
+
+        if (teacher.get().getId() != discipline.get().getTeacher().getId()){
+            throw new IllegalArgumentException("Teacher not check with discipline.");
+        }
+
+        schedule.get().setClassOfStudents(classOfStudents.get());
+        schedule.get().setDiscipline(discipline.get());
+        schedule.get().setTeacher(teacher.get());
+        schedule.get().setAvailable(false);
+
+        return schedule;
     }
 }

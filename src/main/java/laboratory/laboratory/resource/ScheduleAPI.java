@@ -1,9 +1,13 @@
 package laboratory.laboratory.resource;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import laboratory.laboratory.domain.Schedule;
 import laboratory.laboratory.service.ScheduleService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @CrossOrigin
 @RestController
@@ -19,5 +23,11 @@ public class ScheduleAPI {
     @GetMapping(path = "autoGenerate/allLaboratory")
     public ResponseEntity<String> autoGenarateSchedule(@RequestParam(name = "semesterId", defaultValue = "0") Long semesterId){
         return ResponseEntity.ok(this.scheduleService.autoGenerateScheduleAllLaboratory(semesterId));
+    }
+
+    @ApiOperation(value = "Register a schedule")
+    @PostMapping(path = "register")
+    public ResponseEntity<Optional<Schedule>> registerSchedule(@RequestBody Schedule scheduleToRegister) {
+        return ResponseEntity.ok(this.scheduleService.registerSchedule(scheduleToRegister));
     }
 }
