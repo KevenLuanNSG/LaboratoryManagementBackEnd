@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Entity
 public class Semester extends BasicClass{
     @Column(nullable = false)
-    private LocalDateTime dateStart = LocalDateTime.now();
+    private LocalDateTime dateStart;
     @Column(nullable = false)
-    private LocalDateTime dateEnd = LocalDateTime.now();
+    private LocalDateTime dateEnd;
 }

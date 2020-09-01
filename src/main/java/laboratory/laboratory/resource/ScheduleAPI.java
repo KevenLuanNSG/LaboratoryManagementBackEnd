@@ -4,9 +4,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import laboratory.laboratory.domain.Schedule;
 import laboratory.laboratory.service.ScheduleService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 @CrossOrigin
@@ -47,5 +52,17 @@ public class ScheduleAPI {
     @GetMapping(path = "cancel/recurrent")
     public ResponseEntity<Optional<Schedule>> cancelScheduleRecurrent (@RequestParam(name = "scheduleId", defaultValue = "0") Long scheduleId){
         return ResponseEntity.ok(this.scheduleService.cancelScheduleRecurrent(scheduleId));
+    }
+
+    @ApiOperation(value = "View schedules by day")
+    @GetMapping(path = "view/day")
+    public ResponseEntity<List<Schedule>> scheduleListByDay (@RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate date){
+        return ResponseEntity.ok(this.scheduleService.scheduleListByDay(LocalDateTime.of(date, LocalTime.MIN)));
+    }
+
+    @ApiOperation(value = "View schedules by day and laboratory")
+    @GetMapping(path = "view/dayAndLaboratory")
+    public ResponseEntity<List<Schedule>> scheduleListByDayAndLaboratory (@RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate date, @RequestParam(name = "laboratoryId", defaultValue = "0") Long laboratoryId){
+        return ResponseEntity.ok(this.scheduleService.scheduleListByDayAndLaboratory(LocalDateTime.of(date, LocalTime.MIN), laboratoryId));
     }
 }

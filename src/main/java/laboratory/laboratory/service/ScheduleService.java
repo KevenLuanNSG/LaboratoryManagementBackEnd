@@ -5,6 +5,7 @@ import laboratory.laboratory.repository.*;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -291,5 +292,15 @@ public class ScheduleService {
         }
 
         return schedule;
+    }
+
+    @Transactional
+    public List<Schedule> scheduleListByDay (LocalDateTime date){
+        return this.scheduleRepository.findAllByDate(date);
+    }
+
+    @Transactional
+    public List<Schedule> scheduleListByDayAndLaboratory (LocalDateTime date, Long laboratoryId){
+        return this.scheduleRepository.findAllByDateAndLaboratoryId(date, laboratoryId);
     }
 }
