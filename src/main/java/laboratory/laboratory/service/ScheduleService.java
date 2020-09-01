@@ -2,11 +2,14 @@ package laboratory.laboratory.service;
 
 import laboratory.laboratory.domain.*;
 import laboratory.laboratory.repository.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -127,6 +130,12 @@ public class ScheduleService {
        if(!schedule.isPresent()){
            throw new IllegalArgumentException("Schedule not existent.");
        }
+
+        LocalDateTime dateToday = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+        if(dateToday.isAfter(schedule.get().getDate())){
+            throw new IllegalArgumentException("Date to schedule is before than date actual.");
+        }
+
        if(!schedule.get().isAvailable()){
            throw new IllegalArgumentException("Schedule not available.");
        }
@@ -191,6 +200,12 @@ public class ScheduleService {
         if (!schedule.isPresent()){
             throw new IllegalArgumentException("Schedule not existent.");
         }
+
+        LocalDateTime dateToday = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+        if(dateToday.isAfter(schedule.get().getDate())){
+            throw new IllegalArgumentException("Date to schedule is before than date actual.");
+        }
+
         schedule.get().setTeacher(null);
         schedule.get().setDiscipline(null);
         schedule.get().setClassOfStudents(null);
@@ -205,9 +220,16 @@ public class ScheduleService {
         if(!schedule.isPresent()){
             throw new IllegalArgumentException("Schedule not existent.");
         }
+
+        LocalDateTime dateToday = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+        if(dateToday.isAfter(schedule.get().getDate())){
+            throw new IllegalArgumentException("Date to schedule is before than date actual.");
+        }
+
         if(!schedule.get().isAvailable()){
             throw new IllegalArgumentException("Schedule not available.");
         }
+
 
         Optional<ClassOfStudents> classOfStudents = this.classOfStudentsRepository.findById(scheduleToRegister.getClassOfStudents().getId());
         if (!classOfStudents.isPresent()){
@@ -277,6 +299,12 @@ public class ScheduleService {
         if (!schedule.isPresent()){
             throw new IllegalArgumentException("Schedule not existent.");
         }
+
+        LocalDateTime dateToday = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+        if(dateToday.isAfter(schedule.get().getDate())){
+            throw new IllegalArgumentException("Date to schedule is before than date actual.");
+        }
+
         LocalDateTime date = schedule.get().getDate();
         while (date.isBefore(schedule.get().getSemester().getDateEnd().plusDays(1))){
 
@@ -302,5 +330,25 @@ public class ScheduleService {
     @Transactional
     public List<Schedule> scheduleListByDayAndLaboratory (LocalDateTime date, Long laboratoryId){
         return this.scheduleRepository.findAllByDateAndLaboratoryId(date, laboratoryId);
+    }
+
+    @Transactional
+    public Page<Schedule> schedulePageByTeacher (Long teacherId, Pageable pageable){
+        return this.scheduleRepository.findAllByTeacherId(teacherId, pageable);
+    }
+
+    @Transactional
+    public Page<Schedule> schedulePageByTeacherAndLaboratory(Long teacherId, Long laboratoryId, Pageable pageable){
+        return this.scheduleRepository.findAllByTeacherIdAndLaboratoryId(teacherId, laboratoryId, pageable);
+    }
+
+    @Transactional
+    public List<Schedule> scheduleByTeacherAndDate (Long teacherId, LocalDateTime date){
+        return this.scheduleRepository.findAllByTeacherIdAndDate(teacherId, date);
+    }
+
+    @Transactional
+    public List<Schedule> scheduleByTeacherAndLaboratoryAndDate (Long teacherId, Long laboratoryId, LocalDateTime date){
+        return this.scheduleRepository.findAllByTeacherIdAndLaboratoryIdAndDate(teacherId, laboratoryId, date);
     }
 }

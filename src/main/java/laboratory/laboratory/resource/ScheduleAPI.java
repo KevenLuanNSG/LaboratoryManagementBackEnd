@@ -4,6 +4,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import laboratory.laboratory.domain.Schedule;
 import laboratory.laboratory.service.ScheduleService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -62,7 +65,42 @@ public class ScheduleAPI {
 
     @ApiOperation(value = "View schedules by day and laboratory")
     @GetMapping(path = "view/dayAndLaboratory")
-    public ResponseEntity<List<Schedule>> scheduleListByDayAndLaboratory (@RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate date, @RequestParam(name = "laboratoryId", defaultValue = "0") Long laboratoryId){
+    public ResponseEntity<List<Schedule>> scheduleListByDayAndLaboratory (@RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate date,
+                                                                          @RequestParam(name = "laboratoryId", defaultValue = "0") Long laboratoryId){
         return ResponseEntity.ok(this.scheduleService.scheduleListByDayAndLaboratory(LocalDateTime.of(date, LocalTime.MIN), laboratoryId));
+    }
+
+    @ApiOperation(value = "View schedules by teacher")
+    @GetMapping(path = "view/teacher")
+    public ResponseEntity<Page<Schedule>> scheduleByTeacher (@RequestParam(name = "teacherId", defaultValue = "0") Long teacherId,
+                                                             @RequestParam (name = "page", defaultValue = "0") int page,
+                                                             @RequestParam (name = "pageSize", defaultValue = "10") int pageSize,
+                                                             @RequestParam (name = "sort", defaultValue = "date")String sort){
+        return ResponseEntity.ok(this.scheduleService.schedulePageByTeacher(teacherId, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.ASC, sort))));
+    }
+
+    @ApiOperation(value = "View schedules by teacher and laboratory")
+    @GetMapping(path = "view/teacher/laboratory")
+    public ResponseEntity<Page<Schedule>> schedulePageByTeacherAndLaboratory (@RequestParam (name = "teacherId", defaultValue = "0")Long teacherId,
+                                                                              @RequestParam (name = "laboratoryId", defaultValue = "0") Long laboratoryId,
+                                                                              @RequestParam (name = "page", defaultValue = "0") int page,
+                                                                              @RequestParam (name = "pageSize", defaultValue = "10") int pageSize,
+                                                                              @RequestParam (name = "sort", defaultValue = "date")String sort){
+        return ResponseEntity.ok(this.scheduleService.schedulePageByTeacherAndLaboratory(teacherId, laboratoryId, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.ASC, sort))));
+    }
+
+    @ApiOperation(value = "View schedules by teacher for date")
+    @GetMapping(path = "view/teacher/date")
+    public ResponseEntity<List<Schedule>> scheduleByTeacherAndDate (@RequestParam (name = "teacherId", defaultValue = "0") Long teacherId,
+                                                                    @RequestParam (name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate date){
+        return ResponseEntity.ok(this.scheduleService.scheduleByTeacherAndDate(teacherId, LocalDateTime.of(date, LocalTime.MIN)));
+    }
+
+    @ApiOperation(value = "View schedules by teacher and laboratory for date")
+    @GetMapping(path = "view/teacher/laboratory/date")
+    public ResponseEntity<List<Schedule>> scheduleByTeacherAndLaboratoryAndDate (@RequestParam (name = "teacherId", defaultValue = "0") Long teacherId,
+                                                                    @RequestParam (name = "laboratoryId", defaultValue = "0") Long laboratoryId,
+                                                                    @RequestParam (name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate date){
+        return ResponseEntity.ok(this.scheduleService.scheduleByTeacherAndLaboratoryAndDate(teacherId, laboratoryId, LocalDateTime.of(date, LocalTime.MIN)));
     }
 }
