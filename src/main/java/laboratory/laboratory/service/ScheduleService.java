@@ -310,10 +310,16 @@ public class ScheduleService {
 
             Optional<Schedule> scheduleToCancelRecurrent =  this.scheduleRepository.findByAvailableAndDateAndSemesterAndLaboratoryAndShiftAndScheduleTime(false, date, schedule.get().getSemester(), schedule.get().getLaboratory(), schedule.get().getShift(), schedule.get().getScheduleTime() );
             if (scheduleToCancelRecurrent.isPresent()){
-                scheduleToCancelRecurrent.get().setClassOfStudents(null);
-                scheduleToCancelRecurrent.get().setDiscipline(null);
-                scheduleToCancelRecurrent.get().setTeacher(null);
-                scheduleToCancelRecurrent.get().setAvailable(true);
+                if ((schedule.get().getTeacher().getId() == scheduleToCancelRecurrent.get().getTeacher().getId()) &&
+                        (schedule.get().getLaboratory().getId() == scheduleToCancelRecurrent.get().getLaboratory().getId()) &&
+                        (schedule.get().getDiscipline().getId() == scheduleToCancelRecurrent.get().getDiscipline().getId()) &&
+                        (schedule.get().getClassOfStudents().getId() == scheduleToCancelRecurrent.get().getClassOfStudents().getId())) {
+                    scheduleToCancelRecurrent.get().setClassOfStudents(null);
+                    scheduleToCancelRecurrent.get().setDiscipline(null);
+                    scheduleToCancelRecurrent.get().setTeacher(null);
+                    scheduleToCancelRecurrent.get().setAvailable(true);
+                }
+
             }
 
             date = date.plusDays(7);
