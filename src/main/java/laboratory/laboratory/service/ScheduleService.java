@@ -3,6 +3,7 @@ package laboratory.laboratory.service;
 import laboratory.laboratory.domain.*;
 import laboratory.laboratory.repository.*;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -215,7 +216,7 @@ public class ScheduleService {
     }
 
     @Transactional
-    public Optional<Schedule> registerScheduleRecurrent (Schedule scheduleToRegister){
+    public List<Schedule> registerScheduleRecurrent (Schedule scheduleToRegister){
         Optional<Schedule> schedule = this.scheduleRepository.findById(scheduleToRegister.getId());
         if(!schedule.isPresent()){
             throw new IllegalArgumentException("Schedule not existent.");
@@ -277,20 +278,34 @@ public class ScheduleService {
             throw new IllegalArgumentException("Teacher not check with discipline.");
         }
 
+        ArrayList<Schedule> scheduleArrayList = new ArrayList<>();
         LocalDateTime date = schedule.get().getDate();
         while (date.isBefore(semester.get().getDateEnd().plusDays(1))){
 
             Optional<Schedule> scheduleToRegisterRecurrent =  this.scheduleRepository.findByAvailableAndDateAndSemesterAndLaboratoryAndShiftAndScheduleTime(true, date, schedule.get().getSemester(), schedule.get().getLaboratory(), schedule.get().getShift(), schedule.get().getScheduleTime() );
             if (scheduleToRegisterRecurrent.isPresent()){
-                scheduleToRegisterRecurrent.get().setClassOfStudents(classOfStudents.get());
-                scheduleToRegisterRecurrent.get().setDiscipline(discipline.get());
-                scheduleToRegisterRecurrent.get().setTeacher(teacher.get());
-                scheduleToRegisterRecurrent.get().setAvailable(false);
+
+                if ((scheduleToRegisterRecurrent.get().getTeacher() == null) &&
+                        (scheduleToRegisterRecurrent.get().getDiscipline() == null) &&
+                        (scheduleToRegisterRecurrent.get().getClassOfStudents() == null)) {
+                    scheduleToRegisterRecurrent.get().setClassOfStudents(classOfStudents.get());
+                    scheduleToRegisterRecurrent.get().setDiscipline(discipline.get());
+                    scheduleToRegisterRecurrent.get().setTeacher(teacher.get());
+                    scheduleToRegisterRecurrent.get().setAvailable(false);
+                } else {
+                    scheduleArrayList.add(scheduleToRegisterRecurrent.get());
+                }
+            } else {
+                Optional<Schedule> scheduleToRegisterRecurrentFailed =  this.scheduleRepository.findByAvailableAndDateAndSemesterAndLaboratoryAndShiftAndScheduleTime(false, date, schedule.get().getSemester(), schedule.get().getLaboratory(), schedule.get().getShift(), schedule.get().getScheduleTime() );
+                if (scheduleToRegisterRecurrentFailed.isPresent()){
+                    scheduleArrayList.add(scheduleToRegisterRecurrentFailed.get());
+                }
             }
 
             date = date.plusDays(7);
         }
-        return schedule;
+
+        return scheduleArrayList;
     }
 
     @Transactional
@@ -305,21 +320,19 @@ public class ScheduleService {
             throw new IllegalArgumentException("Date to schedule is before than date actual.");
         }
 
+        Teacher teacher = schedule.get().getTeacher();
+        Discipline discipline = schedule.get().getDiscipline();
+        ClassOfStudents classOfStudents = schedule.get().getClassOfStudents();
         LocalDateTime date = schedule.get().getDate();
         while (date.isBefore(schedule.get().getSemester().getDateEnd().plusDays(1))){
+            Optional<Schedule> scheduleToCancelRecurrent =  this.scheduleRepository.findByAvailableAndDateAndSemesterAndLaboratoryAndShiftAndScheduleTimeAndTeacherAndDisciplineAndClassOfStudents(false, date, schedule.get().getSemester(), schedule.get().getLaboratory(), schedule.get().getShift(), schedule.get().getScheduleTime(), teacher, discipline, classOfStudents);
 
-            Optional<Schedule> scheduleToCancelRecurrent =  this.scheduleRepository.findByAvailableAndDateAndSemesterAndLaboratoryAndShiftAndScheduleTime(false, date, schedule.get().getSemester(), schedule.get().getLaboratory(), schedule.get().getShift(), schedule.get().getScheduleTime() );
             if (scheduleToCancelRecurrent.isPresent()){
-                if ((schedule.get().getTeacher().getId() == scheduleToCancelRecurrent.get().getTeacher().getId()) &&
-                        (schedule.get().getLaboratory().getId() == scheduleToCancelRecurrent.get().getLaboratory().getId()) &&
-                        (schedule.get().getDiscipline().getId() == scheduleToCancelRecurrent.get().getDiscipline().getId()) &&
-                        (schedule.get().getClassOfStudents().getId() == scheduleToCancelRecurrent.get().getClassOfStudents().getId())) {
+                System.out.println(scheduleToCancelRecurrent.get().isAvailable());
                     scheduleToCancelRecurrent.get().setClassOfStudents(null);
                     scheduleToCancelRecurrent.get().setDiscipline(null);
                     scheduleToCancelRecurrent.get().setTeacher(null);
                     scheduleToCancelRecurrent.get().setAvailable(true);
-                }
-
             }
 
             date = date.plusDays(7);
@@ -356,5 +369,27 @@ public class ScheduleService {
     @Transactional
     public List<Schedule> scheduleByTeacherAndLaboratoryAndDate (Long teacherId, Long laboratoryId, LocalDateTime date){
         return this.scheduleRepository.findAllByTeacherIdAndLaboratoryIdAndDate(teacherId, laboratoryId, date);
+    }
+
+    @Transactional
+    public List<Schedule> scheduleCompatibleByDateAndClass (LocalDateTime date, Long classId){
+        Optional<ClassOfStudents> classOfStudents = this.classOfStudentsRepository.findById(classId);
+        if (!classOfStudents.isPresent()){
+            throw new IllegalArgumentException("Class of students not existent");
+        }
+        List<Laboratory> laboratoryCompatibleWithClass = this.laboratoryRepository.laboratoryCompatibleWithClass(classOfStudents.get().getNumberOfStudents());
+
+        ArrayList<Schedule> scheduleOfLaboratoryCompatible = new ArrayList<>();
+        if(laboratoryCompatibleWithClass.size() > 0){
+            for (Laboratory laboratory:laboratoryCompatibleWithClass
+                 ) {
+                List<Schedule> scheduleList = this.scheduleRepository.findAllByDateAndLaboratoryId(date, laboratory.getId());
+                for (Schedule schedule:scheduleList
+                     ) {
+                    scheduleOfLaboratoryCompatible.add(schedule);
+                }
+                }
+        }
+        return scheduleOfLaboratoryCompatible;
     }
 }

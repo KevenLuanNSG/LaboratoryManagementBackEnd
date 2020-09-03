@@ -47,7 +47,7 @@ public class ScheduleAPI {
 
     @ApiOperation(value = "Register a recurrent schedule")
     @PostMapping(path = "register/recurrent")
-    public ResponseEntity<Optional<Schedule>> registerScheduleRecurrent (@RequestBody Schedule scheduleToRegister){
+    public ResponseEntity<List<Schedule>> registerScheduleRecurrent (@RequestBody Schedule scheduleToRegister){
         return ResponseEntity.ok(this.scheduleService.registerScheduleRecurrent(scheduleToRegister));
     }
 
@@ -102,5 +102,12 @@ public class ScheduleAPI {
                                                                     @RequestParam (name = "laboratoryId", defaultValue = "0") Long laboratoryId,
                                                                     @RequestParam (name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate date){
         return ResponseEntity.ok(this.scheduleService.scheduleByTeacherAndLaboratoryAndDate(teacherId, laboratoryId, LocalDateTime.of(date, LocalTime.MIN)));
+    }
+
+    @ApiOperation(value = "View schedules available of laboratory compatible with class")
+    @GetMapping(path = "view/laboratory/date/compatible")
+    public ResponseEntity<List<Schedule>> scheduleCompatibleByDateAndClass (@RequestParam (name = "classId", defaultValue = "0") Long classId,
+                                                                                 @RequestParam (name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate date){
+        return ResponseEntity.ok(this.scheduleService.scheduleCompatibleByDateAndClass(LocalDateTime.of(date, LocalTime.MIN), classId));
     }
 }

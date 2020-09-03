@@ -13,5 +13,7 @@ public class Laboratory extends BasicClass{
     @Column(nullable = false)
     private String name;
     @Column(nullable = false)
+    private String block;
+    @Column(nullable = false)
     private int capacity;
 }

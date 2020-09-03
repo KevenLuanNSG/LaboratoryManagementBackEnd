@@ -11,12 +11,9 @@ import java.time.LocalDateTime;
 @Entity
 public class Schedule extends BasicClass{
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Shift shift;
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ScheduleTime scheduleTime;
-    @Column(nullable = false)
     private LocalDateTime date;
     private boolean available = true;
 
