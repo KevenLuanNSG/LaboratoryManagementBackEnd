@@ -392,4 +392,30 @@ public class ScheduleService {
         }
         return scheduleOfLaboratoryCompatible;
     }
+
+    @Transactional
+    public List<Schedule> scheduleCompatibleByDateAndClassTime (LocalDateTime date, Long classId){
+        Optional<ClassOfStudents> classOfStudents = this.classOfStudentsRepository.findById(classId);
+        if (!classOfStudents.isPresent()){
+            throw new IllegalArgumentException("Class of students not existent");
+        }
+        List<Laboratory> laboratoryCompatibleWithClass = this.laboratoryRepository.laboratoryCompatibleWithClass(classOfStudents.get().getNumberOfStudents());
+
+        ArrayList<Schedule> scheduleOfLaboratoryCompatible = new ArrayList<>();
+        if(laboratoryCompatibleWithClass.size() > 0){
+            for (Laboratory laboratory:laboratoryCompatibleWithClass
+            ) {
+                LocalDateTime dateStart = date.minusDays(3);
+                while (dateStart.isBefore(date.plusDays(4))){
+                    List<Schedule> scheduleList = this.scheduleRepository.findAllByDateAndLaboratoryId(dateStart, laboratory.getId());
+                    for (Schedule schedule:scheduleList
+                    ) {
+                        scheduleOfLaboratoryCompatible.add(schedule);
+                    }
+                    dateStart = dateStart.plusDays(1);
+                }
+            }
+        }
+        return scheduleOfLaboratoryCompatible;
+    }
 }

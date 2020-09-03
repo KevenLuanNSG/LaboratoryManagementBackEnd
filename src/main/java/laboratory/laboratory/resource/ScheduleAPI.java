@@ -110,4 +110,11 @@ public class ScheduleAPI {
                                                                                  @RequestParam (name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate date){
         return ResponseEntity.ok(this.scheduleService.scheduleCompatibleByDateAndClass(LocalDateTime.of(date, LocalTime.MIN), classId));
     }
+
+    @ApiOperation(value = "View schedules available of laboratory compatible with class in 3 days before and 3 days after")
+    @GetMapping(path = "view/laboratory/date/compatible/time")
+    public ResponseEntity<List<Schedule>> scheduleCompatibleByDateAndClassTime (@RequestParam (name = "classId", defaultValue = "0") Long classId,
+                                                                            @RequestParam (name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate date){
+        return ResponseEntity.ok(this.scheduleService.scheduleCompatibleByDateAndClassTime(LocalDateTime.of(date, LocalTime.MIN), classId));
+    }
 }
