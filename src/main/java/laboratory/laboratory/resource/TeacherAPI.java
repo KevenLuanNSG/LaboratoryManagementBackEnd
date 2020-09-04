@@ -20,6 +20,9 @@ public class TeacherAPI {
     @ApiOperation(value = "Register a teacher")
     @PostMapping(path = "register")
     public ResponseEntity<Teacher> registerTeacher(@RequestBody Teacher teacher){
+        if (teacher.getCpf().length() != 11){
+            throw new IllegalArgumentException("CPF incorrect.");
+        }
         return ResponseEntity.ok(this.teacherService.registerTeacher(teacher));
     }
 }
