@@ -40,4 +40,51 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
     @Query(nativeQuery = true, value = "select * from schedule where date = :date and shift = :shift and schedule_time = :scheduleTime and laboratory_id = :laboratoryId")
     List <Schedule> findAllByDateAndShiftAndScheduleTimeAndLaboratory(LocalDateTime date, String shift, String scheduleTime, Long laboratoryId);
+
+
+    //agenda
+    @Query(nativeQuery = true, value = "select * from schedule where shift = :shift")
+    Page <Schedule> findAllByShift(String shift, Pageable pageable);
+
+    @Query(nativeQuery = true, value = "select * from schedule where shift = :shift and schedule_time = :scheduleTime")
+    Page<Schedule> findAllByShiftAndScheduleTime(String shift, String scheduleTime, Pageable pageable);
+
+    Page<Schedule> findAllByLaboratoryId(Long laboratoryId, Pageable pageable);
+
+    List<Schedule> findAllByLaboratoryIdAndDate(Long laboratoryId, LocalDateTime date);
+
+
+    //professor
+    List<Schedule> findAllByTeacherIdAndClassOfStudentsId(Long teacherId, Long classId);
+
+    List<Schedule> findAllByTeacherIdAndDisciplineId(Long teacherId, Long disciplineId);
+
+    @Query(nativeQuery = true, value = "select * from schedule where teacher_id = :teacherId and date = :date and shift = :shift")
+    List<Schedule> findAllByTeacherIdAndDateAndShift(Long teacherId, LocalDateTime date, String shift);
+
+    @Query(nativeQuery = true, value = "select * from schedule where teacher_id = :teacherId and date = :date and shift = :shift and schedule_time = :scheduleTime")
+    List<Schedule> findAllByTeacherIdAndDateAndShiftAndScheduleTime(Long teacherId, LocalDateTime date, String shift, String scheduleTime);
+
+    @Query(nativeQuery = true, value = "select * from schedule where teacher_id = :teacherId and shift = :shift")
+    Page<Schedule> findAllByTeacherIdAndShift(Long teacherId, String shift, Pageable pageable);
+
+    @Query(nativeQuery = true, value = "select * from schedule where teacher_id = :teacherId and shift = :shift and schedule_time = :scheduleTime")
+    Page<Schedule> findAllByTeacherIdAndShiftAndScheduleTime(Long teacherId, String shift, String scheduleTime, Pageable pageable);
+
+    //turma
+    Page<Schedule> findAllByClassOfStudentsId(Long classId, Pageable pageable);
+
+    Page<Schedule> findAllByClassOfStudentsIdAndLaboratoryId(Long classId, Long laboratoryId, Pageable pageable);
+
+    List<Schedule> findAllByClassOfStudentsIdAndDate(Long classId, LocalDateTime date);
+
+    List<Schedule> findAllByClassOfStudentsIdAndLaboratoryIdAndDate(Long classId, Long laboratoryId, LocalDateTime date);
+
+    List<Schedule> findAllByClassOfStudentsIdAndTeacherId(Long classId, Long teacherId);
+
+    List<Schedule> findAllByClassOfStudentsIdAndDisciplineId(Long classId, Long disciplineId);
+
+    @Query(nativeQuery = true, value = "select * from schedule where class_of_students_id = :classId and date = :date and schedule_time = :scheduleTime")
+    List<Schedule> findAllByClassOfStudentsIdAndDateAndScheduleTime(Long classId, LocalDateTime date, String scheduleTime);
+
 }
