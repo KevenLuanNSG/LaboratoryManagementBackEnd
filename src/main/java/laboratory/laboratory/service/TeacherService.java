@@ -16,6 +16,9 @@ public class TeacherService {
 
     @Transactional
     public Teacher registerTeacher(Teacher teacher){
+        if (teacher.getCpf().length() != 11){
+            throw new IllegalArgumentException("CPF incorrect.");
+        }
         return this.teacherRepository.save(teacher);
     }
 }

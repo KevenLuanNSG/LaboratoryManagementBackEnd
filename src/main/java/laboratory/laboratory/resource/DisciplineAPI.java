@@ -2,7 +2,6 @@ package laboratory.laboratory.resource;
 
 import io.swagger.annotations.ApiOperation;
 import laboratory.laboratory.domain.Discipline;
-import laboratory.laboratory.domain.Teacher;
 import laboratory.laboratory.service.DisciplineService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

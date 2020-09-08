@@ -2,7 +2,6 @@ package laboratory.laboratory.service;
 
 import laboratory.laboratory.domain.ClassOfStudents;
 import laboratory.laboratory.domain.Discipline;
-import laboratory.laboratory.domain.Teacher;
 import laboratory.laboratory.repository.ClassOfStudentsRepository;
 import laboratory.laboratory.repository.DisciplineRepository;
 import org.springframework.stereotype.Service;

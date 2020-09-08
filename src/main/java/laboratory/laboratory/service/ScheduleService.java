@@ -361,23 +361,45 @@ public class ScheduleService {
         return schedule;
     }
 
+    //Schedule
     @Transactional
-    public List<Schedule> scheduleListByDay (LocalDateTime date){
+    public List<Schedule> scheduleByDay (LocalDateTime date){
         return this.scheduleRepository.findAllByDate(date);
     }
 
     @Transactional
-    public List<Schedule> scheduleListByDayAndLaboratory (LocalDateTime date, Long laboratoryId){
+    public List<Schedule> scheduleByDayAndLaboratory (LocalDateTime date, Long laboratoryId){
         return this.scheduleRepository.findAllByDateAndLaboratoryId(date, laboratoryId);
     }
 
     @Transactional
-    public Page<Schedule> schedulePageByTeacher (Long teacherId, Pageable pageable){
+    public List<Schedule> scheduleByDateAndShift (LocalDateTime date, String shift){
+        return this.scheduleRepository.findAllByDateAndShift(date, shift);
+    }
+
+    @Transactional
+    public List<Schedule> scheduleByDateAndShiftAndScheduleTime (LocalDateTime date, String shift, String scheduleTime){
+        return this.scheduleRepository.findAllByDateAndShiftAndScheduleTime(date, shift, scheduleTime);
+    }
+
+    @Transactional
+    public Page<Schedule> findAllByShift (String shift, Pageable pageable){
+        return this.scheduleRepository.findAllByShift(shift, pageable);
+    }
+
+    @Transactional
+    public Page<Schedule> findAllByShiftAndScheduleTime (String shift, String scheduleTime, Pageable pageable){
+        return this.scheduleRepository.findAllByShiftAndScheduleTime(shift, scheduleTime, pageable);
+    }
+
+    //Teacher
+    @Transactional
+    public Page<Schedule> scheduleByTeacher (Long teacherId, Pageable pageable){
         return this.scheduleRepository.findAllByTeacherId(teacherId, pageable);
     }
 
     @Transactional
-    public Page<Schedule> schedulePageByTeacherAndLaboratory(Long teacherId, Long laboratoryId, Pageable pageable){
+    public Page<Schedule> scheduleByTeacherAndLaboratory(Long teacherId, Long laboratoryId, Pageable pageable){
         return this.scheduleRepository.findAllByTeacherIdAndLaboratoryId(teacherId, laboratoryId, pageable);
     }
 
@@ -391,6 +413,37 @@ public class ScheduleService {
         return this.scheduleRepository.findAllByTeacherIdAndLaboratoryIdAndDate(teacherId, laboratoryId, date);
     }
 
+    @Transactional
+    public List<Schedule> findAllByTeacherIdAndClassOfStudentsId (Long teacherId, Long classId){
+        return this.scheduleRepository.findAllByTeacherIdAndClassOfStudentsId(teacherId, classId);
+    }
+
+    @Transactional
+    public List<Schedule> findAllByTeacherIdAndDisciplineId (Long teacherId, Long disciplineId){
+        return this.scheduleRepository.findAllByTeacherIdAndDisciplineId(teacherId, disciplineId);
+    }
+
+    @Transactional
+    public List<Schedule> findAllByTeacherIdAndDateAndShift (Long teacherId, LocalDateTime date, String shift){
+        return this.scheduleRepository.findAllByTeacherIdAndDateAndShift(teacherId, date, shift);
+    }
+
+    @Transactional
+    public List<Schedule> findAllByTeacherIdAndDateAndShiftAndScheduleTime (Long teacherId, LocalDateTime date, String shift, String scheduleTime){
+        return this.scheduleRepository.findAllByTeacherIdAndDateAndShiftAndScheduleTime(teacherId, date, shift, scheduleTime);
+    }
+
+    @Transactional
+    public Page<Schedule> findAllByTeacherIdAndShift (Long teacherId, String shift, Pageable pageable){
+        return this.scheduleRepository.findAllByTeacherIdAndShift(teacherId, shift, pageable);
+    }
+
+    @Transactional
+    public Page<Schedule> findAllByTeacherIdAndShiftAndScheduleTime (Long teacherId, String shift, String scheduleTime, Pageable pageable){
+        return this.scheduleRepository.findAllByTeacherIdAndShiftAndScheduleTime(teacherId, shift, scheduleTime, pageable);
+    }
+
+    //ClassOfStudents
     @Transactional
     public List<Schedule> scheduleCompatibleByDateAndClass (LocalDateTime date, Long classId){
         Optional<ClassOfStudents> classOfStudents = this.classOfStudentsRepository.findById(classId);
@@ -443,16 +496,6 @@ public class ScheduleService {
     }
 
     @Transactional
-    public List<Schedule> scheduleByDateAndShift (LocalDateTime date, String shift){
-        return this.scheduleRepository.findAllByDateAndShift(date, shift);
-    }
-
-    @Transactional
-    public List<Schedule> scheduleByDateAndShiftandScheduleTime (LocalDateTime date, String shift, String scheduleTime){
-        return this.scheduleRepository.findAllByDateAndShiftAndScheduleTime(date, shift, scheduleTime);
-    }
-
-    @Transactional
     public List<Schedule> scheduleCompatibleWithClassByDateAndShiftAndScheduleTime (Long classId, LocalDateTime date, String shift, String scheduleTime){
         Optional<ClassOfStudents> classOfStudents = this.classOfStudentsRepository.findById(classId);
         if(!classOfStudents.isPresent()){
@@ -500,59 +543,6 @@ public class ScheduleService {
         return scheduleOfLaboratoryCompatible;
     }
 
-    //testar
-    @Transactional
-    public Page<Schedule> findAllByShift (String shift, Pageable pageable){
-        return this.scheduleRepository.findAllByShift(shift, pageable);
-    }
-
-    @Transactional
-    public Page<Schedule> findAllByShiftAndScheduleTime (String shift, String scheduleTime, Pageable pageable){
-        return this.scheduleRepository.findAllByShiftAndScheduleTime(shift, scheduleTime, pageable);
-    }
-
-    @Transactional
-    public Page<Schedule> findAllByLaboratoryId (Long laboratoryId, Pageable pageable){
-        return this.scheduleRepository.findAllByLaboratoryId(laboratoryId, pageable);
-    }
-
-    @Transactional
-    public List<Schedule> findAllByLaboratoryIdAndDate (Long laboratoryId, LocalDateTime date){
-        return this.scheduleRepository.findAllByLaboratoryIdAndDate(laboratoryId, date);
-    }
-
-    @Transactional
-    public List<Schedule> findAllByTeacherIdAndClassOfStudentsId (Long teacherId, Long classId){
-        return this.scheduleRepository.findAllByTeacherIdAndClassOfStudentsId(teacherId, classId);
-    }
-
-    @Transactional
-    public List<Schedule> findAllByTeacherIdAndDisciplineId (Long teacherId, Long disciplineId){
-        return this.scheduleRepository.findAllByTeacherIdAndDisciplineId(teacherId, disciplineId);
-    }
-
-
-
-    @Transactional
-    public List<Schedule> findAllByTeacherIdAndDateAndShift (Long teacherId, LocalDateTime date, String shift){
-        return this.scheduleRepository.findAllByTeacherIdAndDateAndShift(teacherId, date, shift);
-    }
-
-    @Transactional
-    public List<Schedule> findAllByTeacherIdAndDateAndShiftAndScheduleTime (Long teacherId, LocalDateTime date, String shift, String scheduleTime){
-        return this.scheduleRepository.findAllByTeacherIdAndDateAndShiftAndScheduleTime(teacherId, date, shift, scheduleTime);
-    }
-
-    @Transactional
-    public Page<Schedule> findAllByTeacherIdAndShift (Long teacherId, String shift, Pageable pageable){
-        return this.scheduleRepository.findAllByTeacherIdAndShift(teacherId, shift, pageable);
-    }
-
-    @Transactional
-    public Page<Schedule> findAllByTeacherIdAndShiftAndScheduleTime (Long teacherId, String shift, String scheduleTime, Pageable pageable){
-        return this.scheduleRepository.findAllByTeacherIdAndShiftAndScheduleTime(teacherId, shift, scheduleTime, pageable);
-    }
-
     @Transactional
     public Page<Schedule> findAllByClassOfStudentsId(Long classId, Pageable pageable){
         return this.scheduleRepository.findAllByClassOfStudentsId(classId, pageable);
@@ -586,5 +576,16 @@ public class ScheduleService {
     @Transactional
     public List<Schedule> findAllByClassOfStudentsIdAndDateAndScheduleTime(Long classId, LocalDateTime date, String scheduleTime){
         return this.scheduleRepository.findAllByClassOfStudentsIdAndDateAndScheduleTime(classId, date, scheduleTime);
+    }
+
+    //Laboratory
+    @Transactional
+    public Page<Schedule> findAllByLaboratoryId (Long laboratoryId, Pageable pageable){
+        return this.scheduleRepository.findAllByLaboratoryId(laboratoryId, pageable);
+    }
+
+    @Transactional
+    public List<Schedule> findAllByLaboratoryIdAndDate (Long laboratoryId, LocalDateTime date){
+        return this.scheduleRepository.findAllByLaboratoryIdAndDate(laboratoryId, date);
     }
 }
