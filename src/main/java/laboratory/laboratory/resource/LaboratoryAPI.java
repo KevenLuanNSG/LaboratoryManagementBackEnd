@@ -6,6 +6,8 @@ import laboratory.laboratory.service.LaboratoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @CrossOrigin
 @RestController
 @RequestMapping(path = "laboratory")
@@ -20,5 +22,11 @@ public class LaboratoryAPI {
     @PostMapping(path = "register")
     public ResponseEntity<Laboratory> registerLaboratory(@RequestBody Laboratory laboratory){
         return ResponseEntity.ok(this.laboratoryService.registerLaboratory(laboratory));
+    }
+
+    @ApiOperation(value = "Find all in laboratory")
+    @GetMapping(path = "view/all")
+    public ResponseEntity<List<Laboratory>> findAllLaboratory(){
+        return ResponseEntity.ok(this.laboratoryService.findAllLaboratory());
     }
 }

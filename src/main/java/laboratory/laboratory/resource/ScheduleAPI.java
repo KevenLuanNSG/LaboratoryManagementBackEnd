@@ -301,4 +301,10 @@ public class ScheduleAPI {
                                                                         @RequestParam (name = "laboratoryId", defaultValue = "0") Long laboratoryId){
         return ResponseEntity.ok(this.scheduleService.findAllByLaboratoryIdAndDate(laboratoryId, LocalDateTime.of(date, LocalTime.MIN)));
     }
+
+    @ApiOperation(value = "View schedules now")
+    @GetMapping(path = "view/now")
+    public ResponseEntity<List<Schedule>> scheduleByDateAndShiftAndScheduleTimeActual (){
+        return ResponseEntity.ok(this.scheduleService.scheduleByDateAndShiftAndScheduleTimeActual());
+    }
 }

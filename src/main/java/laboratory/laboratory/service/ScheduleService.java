@@ -40,9 +40,9 @@ public class ScheduleService {
     @Transactional
     public String autoGenerateScheduleAllLaboratory(Long semesterId){
 
-        if (this.scheduleRepository.count() > 0){
-            throw new IllegalArgumentException("Semester schedule already generated.");
-        }
+//        if (this.scheduleRepository.count() > 0){
+//            throw new IllegalArgumentException("Semester schedule already generated.");
+//        }
 
         Optional<Semester> semester = this.semesterRepository.findById(semesterId);
         if (!semester.isPresent()){
@@ -121,7 +121,7 @@ public class ScheduleService {
             }
             this.scheduleRepository.saveAll(scheduleList);
         }
-        return "Semester schedule generated with success.";
+        return null;
     }
 
     @Transactional
@@ -160,9 +160,9 @@ public class ScheduleService {
        if(!teacher.isPresent()){
            throw new IllegalArgumentException("Teacher not existent.");
        }
-       if(!(teacher.get().getPassword().equals(password))){
-           throw new IllegalArgumentException("Password incorrect.");
-       }
+       //if(!(teacher.get().getPassword().equals(password))){
+       //    throw new IllegalArgumentException("Password incorrect.");
+       //}
        if((semester.get().getId()) != (schedule.get().getSemester().getId())){
            throw new IllegalArgumentException("Semester is incorrect.");
        }
@@ -204,13 +204,13 @@ public class ScheduleService {
             throw new IllegalArgumentException("Schedule not existent.");
         }
 
-        Optional<Teacher> teacher = this.teacherRepository.findByCpf(cpf);
-        if(!teacher.isPresent()){
-            throw new IllegalArgumentException("Teacher not existent.");
-        }
-        if (!(teacher.get().getPassword().equals(password))){
-            throw new IllegalArgumentException("Password incorrect.");
-        }
+        //Optional<Teacher> teacher = this.teacherRepository.findByCpf(cpf);
+        //if(!teacher.isPresent()){
+        //    throw new IllegalArgumentException("Teacher not existent.");
+        //}
+        //if (!(teacher.get().getPassword().equals(password))){
+        //    throw new IllegalArgumentException("Password incorrect.");
+        //}
 
         LocalDateTime dateToday = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
         if(dateToday.isAfter(schedule.get().getDate())){
@@ -237,9 +237,9 @@ public class ScheduleService {
             throw new IllegalArgumentException("Date to schedule is before than date actual.");
         }
 
-        if(!schedule.get().isAvailable()){
-            throw new IllegalArgumentException("Schedule not available.");
-        }
+        //if(!schedule.get().isAvailable()){
+        //    throw new IllegalArgumentException("Schedule not available.");
+        //}
 
 
         Optional<ClassOfStudents> classOfStudents = this.classOfStudentsRepository.findById(scheduleToRegister.getClassOfStudents().getId());
@@ -262,9 +262,9 @@ public class ScheduleService {
         if(!teacher.isPresent()){
             throw new IllegalArgumentException("Teacher not existent.");
         }
-        if (!(teacher.get().getPassword().equals(password))){
-            throw new IllegalArgumentException("Password incorrect.");
-        }
+        //if (!(teacher.get().getPassword().equals(password))){
+        //    throw new IllegalArgumentException("Password incorrect.");
+        //}
         if((semester.get().getId()) != (schedule.get().getSemester().getId())){
             throw new IllegalArgumentException("Semester is incorrect.");
         }
@@ -328,13 +328,13 @@ public class ScheduleService {
             throw new IllegalArgumentException("Schedule not existent.");
         }
 
-        Optional<Teacher> teacherToCheck = this.teacherRepository.findByCpf(cpf);
-        if (!teacherToCheck.isPresent()){
-            throw new IllegalArgumentException("Teacher not existent.");
-        }
-        if (!(teacherToCheck.get().getPassword().equals(password))){
-            throw new IllegalArgumentException("Password incorrect.");
-        }
+        //Optional<Teacher> teacherToCheck = this.teacherRepository.findByCpf(cpf);
+        //if (!teacherToCheck.isPresent()){
+        //   throw new IllegalArgumentException("Teacher not existent.");
+        //}
+        //if (!(teacherToCheck.get().getPassword().equals(password))){
+        //     throw new IllegalArgumentException("Password incorrect.");
+        //}
 
         LocalDateTime dateToday = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
         if(dateToday.isAfter(schedule.get().getDate())){
@@ -468,26 +468,32 @@ public class ScheduleService {
 
     @Transactional
     public List<Schedule> scheduleCompatibleByDateAndClassTime (LocalDateTime date, Long classId){
+        //Faz uma busca no banco de dados e retorna uma classe de estudantes com Id da classe de estudantes com SpringData
         Optional<ClassOfStudents> classOfStudents = this.classOfStudentsRepository.findById(classId);
         if (!classOfStudents.isPresent()){
             throw new IllegalArgumentException("Class of students not existent");
         }
+
+        //Faz uma busca no banco e retorna uma lista de laboratórios que suportam a quantidade de alunos da classe de estudantes com SQL Nativo
         List<Laboratory> laboratoryCompatibleWithClass = this.laboratoryRepository.laboratoryCompatibleWithClass(classOfStudents.get().getNumberOfStudents());
 
         ArrayList<Schedule> scheduleOfLaboratoryCompatible = new ArrayList<>();
         if(laboratoryCompatibleWithClass.size() > 0){
             for (Laboratory laboratory:laboratoryCompatibleWithClass
             ) {
-                LocalDateTime dateStart = date.minusDays(3);
+                LocalDateTime dateStart = date.minusDays(0);
                 while (dateStart.isBefore(date.plusDays(4))){
                     if(!(dateStart.isBefore(LocalDateTime.now().minusDays(1)))){
+                        //Faz uma busca no banco e retorna uma lista de agendas de acordo com a data e com o laboratório informado
                         List<Schedule> scheduleList = this.scheduleRepository.findAllByDateAndLaboratoryId(dateStart, laboratory.getId());
                         for (Schedule schedule:scheduleList
                         ) {
-                            scheduleOfLaboratoryCompatible.add(schedule);
+                            if (schedule.isAvailable()){
+                                scheduleOfLaboratoryCompatible.add(schedule);
+                            }
+
                         }
                     }
-
                     dateStart = dateStart.plusDays(1);
                 }
             }
@@ -587,5 +593,18 @@ public class ScheduleService {
     @Transactional
     public List<Schedule> findAllByLaboratoryIdAndDate (Long laboratoryId, LocalDateTime date){
         return this.scheduleRepository.findAllByLaboratoryIdAndDate(laboratoryId, date);
+    }
+
+    @Transactional
+    public List<Schedule> scheduleByDateAndShiftAndScheduleTimeActual (){
+        LocalDateTime date = LocalDateTime.now();
+        LocalDate dateToFind = LocalDate.now().plusDays(148);
+        String shift = "Morning";
+        String scheduleTime = "First";
+        if (date.isAfter(LocalDateTime.of(date.getYear(), date.getMonth(), date.getDayOfMonth(), 20, 40, 00, 00))){
+            shift = "Night";
+            scheduleTime = "Second";
+        }
+        return this.scheduleRepository.findAllByDateAndShiftAndScheduleTime(LocalDateTime.of(dateToFind, LocalTime.MIN), shift, scheduleTime);
     }
 }

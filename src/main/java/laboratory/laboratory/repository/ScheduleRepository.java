@@ -34,11 +34,11 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
     //Laboratory
     List<Schedule> findAllByDateAndLaboratoryId(LocalDateTime date, Long laboratoryId);
+
     @Query(nativeQuery = true, value = "select * from schedule where date = :date and shift = :shift and schedule_time = :scheduleTime and laboratory_id = :laboratoryId")
-
     List <Schedule> findAllByDateAndShiftAndScheduleTimeAndLaboratory(LocalDateTime date, String shift, String scheduleTime, Long laboratoryId);
-    @Query(nativeQuery = true, value = "select * from schedule where date = :date and shift = :shift and laboratory_id = :laboratoryId")
 
+    @Query(nativeQuery = true, value = "select * from schedule where date = :date and shift = :shift and laboratory_id = :laboratoryId")
     List<Schedule> findAllByDateAndShiftAndLaboratory(LocalDateTime date, String shift, Long laboratoryId);
 
     Page<Schedule> findAllByLaboratoryId(Long laboratoryId, Pageable pageable);
