@@ -285,6 +285,15 @@ public class ScheduleAPI {
         return ResponseEntity.ok(this.scheduleService.findAllByClassOfStudentsIdAndDateAndScheduleTime(classId, LocalDateTime.of(date, LocalTime.MIN), scheduleTime));
     }
 
+    @ApiOperation(value = "View schedules by class of students and date and shift and schedule time")
+    @GetMapping(path = "view/classAndDateAndShiftAndScheduleTime")
+    public ResponseEntity<List<Schedule>> findAllByClassOfStudentsIdAndDateAndShiftAndScheduleTime (@RequestParam (name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                                                                                                    @RequestParam (name = "shift", defaultValue = "0") String shift,
+                                                                                                    @RequestParam (name = "scheduleTime", defaultValue = "0") String scheduleTime,
+                                                                                                    @RequestParam (name = "classId", defaultValue = "0") Long classId){
+        return ResponseEntity.ok(this.scheduleService.findAllByClassOfStudentsIdAndDateAndShiftAndScheduleTime(classId, LocalDateTime.of(date, LocalTime.MIN), shift, scheduleTime));
+    }
+
     //Laboratory
     @ApiOperation(value = "View schedules by laboratory")
     @GetMapping(path = "view/laboratory")

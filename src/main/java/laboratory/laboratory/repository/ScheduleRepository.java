@@ -54,7 +54,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
     List<Schedule> findAllByTeacherIdAndDate(Long teacherId, LocalDateTime date);
 
-    List<Schedule> findAllByTeacherIdAndClassOfStudentsId(Long teacherId, Long classId);
+    List<Schedule> findAllByTeacherIdAndClassOfStudentsIdOrderByDate(Long teacherId, Long classId);
 
     List<Schedule> findAllByTeacherIdAndDisciplineId(Long teacherId, Long disciplineId);
 
@@ -85,5 +85,8 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
     @Query(nativeQuery = true, value = "select * from schedule where class_of_students_id = :classId and date = :date and schedule_time = :scheduleTime")
     List<Schedule> findAllByClassOfStudentsIdAndDateAndScheduleTime(Long classId, LocalDateTime date, String scheduleTime);
+
+    @Query(nativeQuery = true, value = "select * from schedule where class_of_students_id = :classOfStudentsId and date = :date and shift = :shift and schedule_time = :scheduleTime")
+    List<Schedule> findAllByClassOfStudentsIdAndDateAndShiftAndScheduleTime(Long classOfStudentsId, LocalDateTime date, String shift, String scheduleTime);
 
 }

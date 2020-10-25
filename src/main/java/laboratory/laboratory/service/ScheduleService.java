@@ -415,7 +415,7 @@ public class ScheduleService {
 
     @Transactional
     public List<Schedule> findAllByTeacherIdAndClassOfStudentsId (Long teacherId, Long classId){
-        return this.scheduleRepository.findAllByTeacherIdAndClassOfStudentsId(teacherId, classId);
+        return this.scheduleRepository.findAllByTeacherIdAndClassOfStudentsIdOrderByDate(teacherId, classId);
     }
 
     @Transactional
@@ -584,6 +584,11 @@ public class ScheduleService {
         return this.scheduleRepository.findAllByClassOfStudentsIdAndDateAndScheduleTime(classId, date, scheduleTime);
     }
 
+    @Transactional
+    public List<Schedule> findAllByClassOfStudentsIdAndDateAndShiftAndScheduleTime (Long classId, LocalDateTime date, String shift, String scheduleTime){
+        return this.scheduleRepository.findAllByClassOfStudentsIdAndDateAndShiftAndScheduleTime(classId, date, shift, scheduleTime);
+    }
+
     //Laboratory
     @Transactional
     public Page<Schedule> findAllByLaboratoryId (Long laboratoryId, Pageable pageable){
@@ -598,9 +603,25 @@ public class ScheduleService {
     @Transactional
     public List<Schedule> scheduleByDateAndShiftAndScheduleTimeActual (){
         LocalDateTime date = LocalDateTime.now();
-        LocalDate dateToFind = LocalDate.now().plusDays(148);
+        LocalDate dateToFind = LocalDate.now();//.plusDays(148);
         String shift = "Morning";
         String scheduleTime = "First";
+        if (date.isAfter(LocalDateTime.of(date.getYear(), date.getMonth(), date.getDayOfMonth(), 9, 40, 00, 00))){
+            shift = "Morning";
+            scheduleTime = "Second";
+        }
+        if (date.isAfter(LocalDateTime.of(date.getYear(), date.getMonth(), date.getDayOfMonth(), 12, 00, 00, 00))){
+            shift = "Afternoon";
+            scheduleTime = "First";
+        }
+        if (date.isAfter(LocalDateTime.of(date.getYear(), date.getMonth(), date.getDayOfMonth(), 14, 40, 00, 00))){
+            shift = "Afternoon";
+            scheduleTime = "Second";
+        }
+        if (date.isAfter(LocalDateTime.of(date.getYear(), date.getMonth(), date.getDayOfMonth(), 17, 00, 00, 00))){
+            shift = "Night";
+            scheduleTime = "First";
+        }
         if (date.isAfter(LocalDateTime.of(date.getYear(), date.getMonth(), date.getDayOfMonth(), 20, 40, 00, 00))){
             shift = "Night";
             scheduleTime = "Second";
